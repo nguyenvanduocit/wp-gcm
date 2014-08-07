@@ -1,0 +1,14 @@
+body {
+    background: #7f9b4e url(../images/bg2.jpg) no-repeat center top;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    background-size: cover;
+}
+body.login div#login h1 a {
+    background-image: url(<?php echo home_url( '' ) ?>);
+    background-size: 100%;
+    padding-bottom: 0px;
+    height: 316px;
+    width: auto
+}
+#login {padding: 2% 0 0; margin-bottom: 0}

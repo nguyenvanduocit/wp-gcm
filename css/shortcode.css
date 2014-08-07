@@ -1,0 +1,14 @@
+.tutstep{
+	background: url("../images/step.jpg") no-repeat;
+	background-size: 100%;
+	width: 170px;
+	height: 62px;
+	text-align: center;
+	color: #fff;
+}
+
+.tutstep .steptitle{
+	font-size: 20px;
+	padding-top: 37px;
+	display: block;
+}
