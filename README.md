@@ -13,3 +13,7 @@ Required
 ----
 
 Posts-to-posts plugin required;
+
+Google chrome client
+---
+https://github.com/nguyenvanduocit/GCMNotify
