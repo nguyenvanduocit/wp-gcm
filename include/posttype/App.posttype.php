@@ -170,7 +170,7 @@ class AppDetailMetabox extends scbPostMetabox
             'value'	=>	'',
             'name'	=> 'senderid'
         ));
-		parent::__construct($this->_PostTypeName.'DetailMetabox',$this->_PostTypeName." detail",$arg);
+		parent::__construct(get_class($this),$this->_PostTypeName." detail",$arg);
 	}
 	
 	private function addField($field)

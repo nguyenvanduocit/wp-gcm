@@ -30,8 +30,22 @@ class GCM_Core {
             GCMCustomDashboard::instance()->register();
 			add_filter('admin_footer_text', array( __CLASS__, 'modify_footer_admin') );
 			add_action('admin_enqueue_scripts', array( __CLASS__, 'post_screen_scripts' ));
+            if (current_user_can('edit_posts') || current_user_can('edit_pages')) {
+                add_action('admin_print_footer_scripts', array( __CLASS__, 'my_shortcode_quicktag') );
+            }
 		}
 	}
+
+    function my_shortcode_quicktag()
+    {
+        if (wp_script_is('quicktags')) {
+            ?>
+            <script type="text/javascript">
+                QTags.addButton( 'chrome_notify', 'chrome_notify', '{"notificationOptions":{\n\t"type":"basic",\n\t"iconUrl":"",\n\t"appIconMaskUrl":"",\n\t"title":"",\n\t"message":"", \n\t"contextMessage":"", \n\t"priority":0, \n\t"imageUrl":""\n}}', '', '', 'Preformatted text tag' );
+            </script>
+        <?php
+        }
+    }
 
     public static function fix_session_bs() {
 
@@ -42,8 +56,9 @@ class GCM_Core {
 
     function onPostStatusChange($ID, $post)
     {
-        $result = MessageControler::send($post);
-        $_SESSION['gcm_admin_notices'] = $result;
+        $results = MessageControler::send($post);
+
+        //$_SESSION['gcm_admin_notices'] = $results[4]->getResults()[0]->getSuccess();
     }
     function wpSub_admin_notices()
     {
@@ -122,7 +137,7 @@ class GCM_Core {
 	function post_screen_scripts() {
 		$screen = get_current_screen(); 
 		if (is_object($screen) && $screen->id=="message") {
-			wp_enqueue_script( 'netcart-admin-script', plugins_url( 'script/MessagePostScript.js', __FILE__ ),array( 'jquery'), "1.0.0", false );
+			wp_enqueue_script( 'netcart-admin-script', plugins_url( 'script/WebsitePostScript.js', __FILE__ ),array( 'jquery'), "1.0.0", false );
 		}
 	}
 

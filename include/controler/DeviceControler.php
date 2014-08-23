@@ -66,4 +66,23 @@ class DeviceControler extends BaseControler{
             }
         }
     }
+
+    public static function delete($deviceID)
+    {
+        wp_delete_post($deviceID);
+    }
+
+    public static function updateRegistrationId($oldRegistrationId, $canonicalRegistrationId)
+    {
+        $isNewIdExist = self::isExist($canonicalRegistrationId);
+        $isOldIdExist = self::isExist($oldRegistrationId);
+        if($isNewIdExist)
+        {
+            self::delete($isOldIdExist);
+        }
+        else
+        {
+            update_post_meta($isOldIdExist, "device_RegistrationId", $canonicalRegistrationId);
+        }
+    }
 }

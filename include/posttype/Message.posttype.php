@@ -26,18 +26,21 @@ class MessagePostType
 		add_action( 'admin_head', array( __CLASS__, 'add_menu_icons_styles' ) );
 		$this->wpSub_custom_metabox();
 
-        //add_action("transition_post_status", array( __CLASS__, 'wpSub_on_publish_post'), 10, 3);
+        add_action("transition_post_status", array( __CLASS__, 'wpSub_on_publish_post'), 10, 3);
         //add_action("new_to_publish", array( __CLASS__, 'wpSub_on_publish_post'),10, 3);
         //add_action('draft_to_publish', array( __CLASS__, 'wpSub_on_publish_post'), 10, 3);
         //add_action('pending_to_publish', array( __CLASS__, 'wpSub_on_publish_post'), 10, 3);
         //add_action('publish_to_trash', array( __CLASS__, 'wpSub_on_publish_post'), 10, 3);
-        //add_action('save_post', array( __CLASS__, 'wpSub_on_save_post'));
+        //add_action('publish_app', array( __CLASS__, 'wpSub_on_save_post'));
 	}
 
-    function wpSub_on_publish_post($ID, $post)
+    function wpSub_on_publish_post($new_status, $old_status, $post)
     {
-        die("asdf");
-        add_action('admin_notices' , array( __CLASS__,'wpSub_admin_notices'));
+        if($post->post_type == "message")
+        {
+            $result = MessageControler::send($post);
+            //add_action('admin_notices' , array( __CLASS__,'wpSub_admin_notices'));
+        }
     }
 
     function wpSub_on_save_post($post_id)
@@ -217,7 +220,7 @@ class MessageDetailMetabox extends scbPostMetabox
 			'type'	=> 'text',
 			'name'	=> 'Attribute_field'
 		));
-		parent::__construct($this->_PostTypeName.'DetailMetabox',$this->_PostTypeName." detail",$arg);
+		parent::__construct(get_class($this),$this->_PostTypeName." detail",$arg);
 	}
 
 	private function addField($field)

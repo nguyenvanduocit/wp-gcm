@@ -35,12 +35,12 @@ class GCMAPI
     function device_register()
     {
         $response = new APIResponse();
-        if ( ( isset($_REQUEST['regid']) && $_REQUEST['regid'] != "") && ( isset($_REQUEST['appid']) && $_REQUEST['appid'] != "") ) {
+        if ( ( isset($_REQUEST['regid']) && $_REQUEST['regid'] != "") && ( isset($_REQUEST['projectid']) && $_REQUEST['projectid'] != "") ) {
 
             $registrationId = $_REQUEST['regid'];
-            $appid = $_REQUEST['appid'];
-
-            if(AppControler::isExist($appid))
+            $projectid = $_REQUEST['projectid'];
+            $appid =  AppControler::getAppIdByProjectId($projectid);
+            if($appid)
             {
                 $deviceid = DeviceControler::isExist($registrationId);
                 if( $deviceid )

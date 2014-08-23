@@ -14,13 +14,12 @@ class MessageControler extends BaseControler{
             'connected_type' => 'app_to_message',
             'connected_items' => $message
         ));
+        $results = array();
         foreach($apps as $app)
         {
             $result = AppControler::push($app, $message);
-            if(is_wp_error($result))
-            {
-                return $result->get_error_message();
-            }
+            $results[$app->ID] = $result;
         };
+        return $results;
     }
 }

@@ -1,10 +1,10 @@
 <?php
-require_once plugin_dir_path( __FILE__ ) . '/../lib/PHP_GCM/Constants.php';
-require_once plugin_dir_path( __FILE__ ) . '/../lib/PHP_GCM/InvalidRequestException.php';
-require_once plugin_dir_path( __FILE__ ) . '/../lib/PHP_GCM/Message.php';
-require_once plugin_dir_path( __FILE__ ) . '/../lib/PHP_GCM/MulticastResult.php';
-require_once plugin_dir_path( __FILE__ ) . '/../lib/PHP_GCM/Result.php';
-require_once plugin_dir_path( __FILE__ ) . '/../lib/PHP_GCM/Sender.php';
+require_once plugin_dir_path(__FILE__) . '/../lib/PHP_GCM/Constants.php';
+require_once plugin_dir_path(__FILE__) . '/../lib/PHP_GCM/InvalidRequestException.php';
+require_once plugin_dir_path(__FILE__) . '/../lib/PHP_GCM/Message.php';
+require_once plugin_dir_path(__FILE__) . '/../lib/PHP_GCM/MulticastResult.php';
+require_once plugin_dir_path(__FILE__) . '/../lib/PHP_GCM/Result.php';
+require_once plugin_dir_path(__FILE__) . '/../lib/PHP_GCM/Sender.php';
 
 use PHP_GCM\Constants as Constants;
 use PHP_GCM\InvalidRequestException as InvalidRequestException;
@@ -12,7 +12,8 @@ use PHP_GCM\Message as Message;
 use PHP_GCM\Result as Result;
 use PHP_GCM\Sender as Sender;
 
-class AppControler extends BaseControler{
+class AppControler extends BaseControler
+{
     /**
      * @param $appID
      * @return bool
@@ -28,6 +29,25 @@ class AppControler extends BaseControler{
                           AND post_type = 'app'";
         $result = $wpdb->get_row($query, OBJECT);
 
+        if ($result != null) {
+            return $result->ID;
+        } else {
+            return false;
+        }
+    }
+
+    public static function getAppIdByProjectId($projectID)
+    {
+        global $wpdb;
+        $query = "SELECT DISTINCT ID
+                    FROM $wpdb->posts,$wpdb->postmeta
+                    WHERE $wpdb->posts.ID = $wpdb->postmeta.post_id
+                        AND $wpdb->postmeta.meta_key = 'app_detail_projectid'
+                        AND $wpdb->postmeta.meta_value = '{$projectID}'
+                        AND $wpdb->posts.post_status = 'publish'
+                        AND $wpdb->posts.post_type = 'app'";
+        $result = $wpdb->get_row($query, OBJECT);
+
         if ($result != null)
         {
             return $result->ID;
@@ -37,6 +57,7 @@ class AppControler extends BaseControler{
             return false;
         }
     }
+
     public static function push($app, $message){
 
         $appmeta = get_post_meta($app->ID);
@@ -55,19 +76,36 @@ class AppControler extends BaseControler{
             'connected_items' => $app
         ));
 
-        $deviceRegistrationId = array();
+        $deviceRegistrationIds = array();
 
         foreach($devices as $device)
         {
             $devicemeta = get_post_meta($device->ID);
-            $deviceRegistrationId[] = $devicemeta['device_RegistrationId'][0];
+            $deviceRegistrationIds[] = $devicemeta['device_RegistrationId'][0];
         }
 
         $sender = new Sender($gcmApiKey);
         $message = new Message($collapseKey, $payloadData);
         try {
-            $result = $sender->sendMulti($message, $deviceRegistrationId, $numberOfRetryAttempts);
-            die($result->getTotal());
+            $sendResults = $sender->sendMulti($message, $deviceRegistrationIds, $numberOfRetryAttempts);
+            if ($sendResults->getCanonicalIds() > 0) {
+                $results = $sendResults->getResults();
+
+                $index = 0;
+                foreach($results as $result)
+                {
+                    $canonicalRegistrationId = $result->getCanonicalRegistrationId();
+                    if($canonicalRegistrationId) {
+                        DeviceControler::updateRegistrationId($deviceRegistrationIds[$index], $canonicalRegistrationId);
+                    }
+                    $index++;
+                }
+            }
+            echo "<pre > ";
+            print_r($sendResults);
+            echo "</pre > ";
+            die();
+            return $sendResults;
         } catch (InvalidArgumentException $e) {
             return new WP_Error("AppControler_push_fail",$e->getMessage());
         } catch (InvalidRequestException $e) {
